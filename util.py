@@ -54,7 +54,6 @@ def read_tree(bitreader):
 
     
 
-
 def decode_byte(tree, bitreader):
     """
     Reads bits from the bit reader and traverses the tree from
@@ -69,6 +68,12 @@ def decode_byte(tree, bitreader):
       Next byte of the compressed bit stream.
     """
     
+    while(True):
+        try:
+            bit = bitreader.readbit()
+
+        except EOFError:
+            break
 
 
 def decompress(compressed, uncompressed):
