@@ -29,23 +29,28 @@ def read_tree(bitreader):
 
     implementation: read each bit, and sort depending on what value it makes up
     '''
+    out_stream = ""
+    bit_stream = ""
 
-    # bit_stream = ""
-    # stream = ""
-    # while(True):
-    #     try:
-    #         bit = bitreader.readbit()
-    #         bit_stream =+ str(bit)
-    #         if bit_steam = "01":
-    #             stream=+chr(bitreader.readbits(8))
-    #             bit_stream = ""
-    #         elif bit_stream[0] == "1":
-    #             bit_steam = "" 
-    #     except EOFError:
-    #         break
-    
-    freq_table = make_freq_table(bitreader.input)
-    return make_tree(freq_table)
+    while(True):
+        try:
+            bit = bitreader.readbit()
+            bit_stream += bit
+
+            if bit_stream == '1':
+                #branch 
+                bit_stream = ""
+                continue
+            elif bit_stream == '01':
+                val = chr(bitreader.readbits(8))
+                out_stream += val
+        except EOFError:
+            break
+        
+    table = make_freq_table(out_stream)
+    return make_tree(table)
+        
+
 
     
 
@@ -118,5 +123,4 @@ def compress(tree, uncompressed, compressed):
     '''
     pass
 
-# if __name__ == "__main__":
 
