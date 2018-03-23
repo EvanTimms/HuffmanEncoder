@@ -68,13 +68,7 @@ def decode_byte(tree, bitreader):
     Returns:
       Next byte of the compressed bit stream.
     """
-    bit_stream = ""
-    while(True):
-        try:
-            bit = bitreader.readbit()
-
-        except EOFError:
-            break
+    
 
 
 def decompress(compressed, uncompressed):
