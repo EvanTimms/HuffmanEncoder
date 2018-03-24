@@ -65,7 +65,7 @@ def decode_byte(tree, bitreader):
         #return value of tree leaf
         return tree.value
     else:
-        print("big problems boys")
+        print("big problems boys    ")
     
 
 
@@ -98,8 +98,6 @@ def decompress(compressed, uncompressed):
 
     
     
-
-
 def write_tree(tree, bitwriter):
     '''Write the specified Huffman tree to the given bit writer.  The
     tree is written in the format described above for the read_tree
@@ -111,7 +109,23 @@ def write_tree(tree, bitwriter):
       tree: A Huffman tree.
       bitwriter: An instance of bitio.BitWriter to write the tree to.
     '''
-    pass    
+    if isinstance(tree, huffman.TreeLeaf):
+        if tree.value is None:
+            bitwriter.writebit(False)
+            bitwriter.writebit(False)
+        else:
+            bitwriter.writebit(False)
+            bitwriter.writebit(True)
+            sequence = str(bin(tree.value))
+            for bit in sequence[2:]:
+                if bit == '1':
+                    bitwriter.writebit(True)
+                else:
+                    bitwriter.writebit(False)
+
+        if isinstance(tree, huffman.TreeBranch):
+            write_tree(tree.left, bitwriter)
+            write_tree(tree.right, bitwriter)   
 
 
 def compress(tree, uncompressed, compressed):
