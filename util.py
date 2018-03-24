@@ -29,7 +29,19 @@ def read_tree(bitreader):
     '''     
     #pass the input of the bitreader(the opened file) and construct
     #the frequency table from the stream
-    table = huffman.make_freq_table(bitreader.input)
+    #table = huffman.make_freq_table(bitreader.input)
+
+    bit = bitreader.readbit()
+    if bit == 1:
+        return huffman.TreeBranch(read_tree(bitreader), read_tree(bitreader))
+    elif bit == 0:
+        secondBit = bitreader.readbit()
+        if secondBit == 0:
+            return
+        elif secondBit == 1:
+            return huffman.TreeLeaf(bitreader.readbits(8))
+
+
 
     return huffman.make_tree(table)
         
@@ -116,16 +128,17 @@ def write_tree(tree, bitwriter):
         else:
             bitwriter.writebit(False)
             bitwriter.writebit(True)
-            sequence = str(bin(tree.value))
-            for bit in sequence[2:]:
-                if bit == '1':
-                    bitwriter.writebit(True)
-                else:
-                    bitwriter.writebit(False)
+            bitwriter.writebits(tree.value, 8)
+            #sequence = str(bin(tree.value))
+            #for bit in sequence[2:]:
+             #   if bit == '1':
+              #      bitwriter.writebit(True)
+               # else:
+                #    bitwriter.writebit(False)
 
-        if isinstance(tree, huffman.TreeBranch):
-            write_tree(tree.left, bitwriter)
-            write_tree(tree.right, bitwriter)   
+    if isinstance(tree, huffman.TreeBranch):
+        write_tree(tree.left, bitwriter)
+        write_tree(tree.right, bitwriter)
 
 
 def compress(tree, uncompressed, compressed):
@@ -162,4 +175,15 @@ def compress(tree, uncompressed, compressed):
                     writer.writebit(False)
         except EOFError:
             break
+
+if __name__ == "__main__":
+    with open("in.txt", "rb") as inFile:
+        reader = bitio.BitReader(inFile)
+        freq = huffman.make_freq_table(reader.input)
+        print(freq)
+        tree = huffman.make_tree(freq)
+        print("TREE:   ", tree)
+    with open("out.txt", "wb") as outFile:
+        writer = bitio.BitWriter(outFile)
+        write_tree(tree, writer)
 
