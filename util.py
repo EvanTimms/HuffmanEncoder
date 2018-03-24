@@ -50,9 +50,6 @@ def read_tree(bitreader):
     return make_tree(table)
         
 
-
-    
-
 def decode_byte(tree, bitreader):
     """
     Reads bits from the bit reader and traverses the tree from
