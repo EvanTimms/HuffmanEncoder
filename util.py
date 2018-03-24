@@ -38,7 +38,7 @@ def decode_byte(tree, bitreader):
     """
     Reads bits from the bit reader and traverses the tree from
     the root to a leaf. Once a leaf is reached, bits are no longer read
-    and the value of that leave is returned.
+    and the value of that leaf is returned.
     
     Args:
       bitreader: An instance of bitio.BitReader to read the tree from.
@@ -47,27 +47,7 @@ def decode_byte(tree, bitreader):
     Returns:
       Next byte of the compressed bit stream.
     """
-    encoded_table = huffman.make_encoding_table(tree)
-    keys = encoded_table.keys()
-    bit_stream = ""
-
-    while(True):
-        try:
-            bit = bitreader.readbit()
-            bit_stream += str(bit)
-
-            if bit_stream == '1':
-                #branch 
-                bit_stream = ""
-                continue
-            elif bit_stream == '01':
-                val = bitreader.readbits(8)
-                for key in keys:
-                    if val == key:
-                        encoded_table[key]
-        except EOFError:
-            break
-
+   
 
 
 def decompress(compressed, uncompressed):
@@ -82,8 +62,15 @@ def decompress(compressed, uncompressed):
           output is written.
 
     '''
-    reader = bitio.bitreader(compressed)
+    reader = bitio.BitReader(compressed)
+    writer = bitio.BitWriter(uncompressed)
+
     tree = read_tree(reader)
+
+    while(byte != #TODO: what is eof symbol):
+        byte = decode_byte(tree, reader)
+        writer.writebits(byte,8)
+
     
     
 
