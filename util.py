@@ -27,27 +27,11 @@ def read_tree(bitreader):
 
     implementation: read each bit, and sort depending on what value it makes up
     '''     
-    out_stream = ""
-    bit_stream = ""
+    #pass the input of the bitreader(the opened file) and contstruct
+    #the frequency table from the stream
+    table = huffman.make_freq_table(bitreader.input)
 
-    while(True):
-        try:
-            bit = bitreader.readbit()
-            bit_stream += str(bit)
-
-            if bit_stream == '1':
-                #branch 
-                bit_stream = ""
-                continue
-            elif bit_stream == '01':
-                #TODO: change to allow eof character to work
-                val = chr(bitreader.readbits(8))
-                out_stream += val
-        except EOFError:
-            break
-        
-    table = make_freq_table(out_stream)
-    return make_tree(table)
+    return huffman.make_tree(table)
         
 
 def decode_byte(tree, bitreader):
@@ -63,7 +47,7 @@ def decode_byte(tree, bitreader):
     Returns:
       Next byte of the compressed bit stream.
     """
-    encoded_table = make_encoding_table(tree)
+    encoded_table = huffman.make_encoding_table(tree)
     keys = encoded_table.keys()
     bit_stream = ""
 
@@ -98,9 +82,9 @@ def decompress(compressed, uncompressed):
           output is written.
 
     '''
-    reader = bitreader(compressed)
+    reader = bitio.bitreader(compressed)
     tree = read_tree(reader)
-    print("hello")
+    
     
 
 

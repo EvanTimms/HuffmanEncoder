@@ -33,11 +33,11 @@ def make_tree(freq_table):
         trees.insert(TreeLeaf(symbol), freq)
 
     while len(trees) > 1:
-        right, rfreq = trees.pop_min()
-        left, lfreq = trees.pop_min()
+        right, rfreq = trees.popmin()
+        left, lfreq = trees.popmin()
         trees.insert(TreeBranch(left, right), lfreq+rfreq)
 
-    tree, _ = trees.pop_min()
+    tree, _ = trees.popmin()
     return tree
 
 
