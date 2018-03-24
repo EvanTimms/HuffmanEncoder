@@ -46,9 +46,24 @@ def decode_byte(tree, bitreader):
 
     Returns:
       Next byte of the compressed bit stream.
+
+    Starting from the root, traverse the Huffman tree. Each bit from
+    the input sequence tells you when to go left or right.
     """
     
-   
+    bit = bitreader.readbit()
+    
+    if bit == 1:
+        #traverse left
+        tree = tree[tree._lchild]
+        return decode_byte(tree, bitreader)
+    elif bit == 0:
+        #traverse right
+        tree = tree[tree._rchild]
+        return decode_byte(tree, bitreader)
+    elif isInstance(tree, huffman.TreeLeaf()):
+        return tree[0][0].value
+    
 
 
 def decompress(compressed, uncompressed):
@@ -68,9 +83,12 @@ def decompress(compressed, uncompressed):
 
     tree = read_tree(reader)
 
-    while(byte != #TODO: what is eof symbol, try 23):
-        byte = decode_byte(tree, reader)
-        writer.writebits(byte,8)
+    while(True):
+        try:
+            byte = decode_byte(tree, reader)
+            writer.writebits(byte,8)
+        except EOFError:
+            break
 
     
     
