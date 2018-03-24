@@ -10,8 +10,6 @@ def read_tree(bitreader):
     bit reader should be ready to read the next bit immediately
     following the tree description.
 
-
-
     Huffman trees are stored in the following format:
       * TreeLeaf is represented by the two bits 01, followed by 8 bits
           for the symbol at that leaf.
@@ -28,20 +26,21 @@ def read_tree(bitreader):
       
 
     implementation: read each bit, and sort depending on what value it makes up
-    '''
+    '''     
     out_stream = ""
     bit_stream = ""
 
     while(True):
         try:
             bit = bitreader.readbit()
-            bit_stream += bit
+            bit_stream += str(bit)
 
             if bit_stream == '1':
                 #branch 
                 bit_stream = ""
                 continue
             elif bit_stream == '01':
+                #TODO: change to allow eof character to work
                 val = chr(bitreader.readbits(8))
                 out_stream += val
         except EOFError:
@@ -67,13 +66,27 @@ def decode_byte(tree, bitreader):
     Returns:
       Next byte of the compressed bit stream.
     """
-    
+    encoded_table = make_encoding_table(tree)
+    keys = encoded_table.keys()
+    bit_stream = ""
+
     while(True):
         try:
             bit = bitreader.readbit()
+            bit_stream += str(bit)
 
+            if bit_stream == '1':
+                #branch 
+                bit_stream = ""
+                continue
+            elif bit_stream == '01':
+                val = bitreader.readbits(8)
+                for key in keys:
+                    if val == key:
+                        encoded_table[key]
         except EOFError:
             break
+
 
 
 def decompress(compressed, uncompressed):
@@ -102,7 +115,7 @@ def write_tree(tree, bitwriter):
       tree: A Huffman tree.
       bitwriter: An instance of bitio.BitWriter to write the tree to.
     '''
-    pass
+    pass    
 
 
 def compress(tree, uncompressed, compressed):
