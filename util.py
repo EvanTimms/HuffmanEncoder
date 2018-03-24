@@ -98,7 +98,10 @@ def decompress(compressed, uncompressed):
           output is written.
 
     '''
-    pass
+    reader = bitreader(compressed)
+    tree = read_tree(reader)
+    print("hello")
+    
 
 
 def write_tree(tree, bitwriter):
