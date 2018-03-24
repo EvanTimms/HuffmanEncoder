@@ -50,19 +50,22 @@ def decode_byte(tree, bitreader):
     Starting from the root, traverse the Huffman tree. Each bit from
     the input sequence tells you when to go left or right.
     """
-    
+    #read a bit
     bit = bitreader.readbit()
-    
-    if bit == 1:
-        #traverse left
-        tree = tree[tree._lchild]
-        return decode_byte(tree, bitreader)
-    elif bit == 0:
-        #traverse right
-        tree = tree[tree._rchild]
-        return decode_byte(tree, bitreader)
-    elif isInstance(tree, huffman.TreeLeaf()):
-        return tree[0][0].value
+    if isinstance(tree, TreeBranch):
+        if bit == 1:
+            #traverse left
+            tree = tree.left
+            return decode_byte(tree, bitreader)
+        elif bit == 0:
+            #traverse right
+            tree = tree.right
+            return decode_byte(tree, bitreader)
+    elif isInstance(tree, TreeLeaf):
+        #return value of tree leaf
+        return tree.value
+    else:
+        print("big problems boys")
     
 
 
@@ -78,12 +81,15 @@ def decompress(compressed, uncompressed):
           output is written.
 
     '''
+    #set up reader and writer 
     reader = bitio.BitReader(compressed)
     writer = bitio.BitWriter(uncompressed)
-
+    #initate tree from 
     tree = read_tree(reader)
 
     while(True):
+        #until eof occurs, read byte from reader and decode using reader
+        #then right the byte to the uncompressed file using the writer
         try:
             byte = decode_byte(tree, reader)
             writer.writebits(byte,8)
@@ -123,6 +129,23 @@ def compress(tree, uncompressed, compressed):
       compressed: A file stream that will receive the tree description
           and the coded input data.
     '''
-    pass
+    #set up reader and writer 
+    reader = bitio.BitReader(compressed)
+    writer = bitio.BitWriter(uncompressed)
+    write_tree(tree, writer)
 
+    encoder = huffman.make_encoding_table(tree)
+
+    while(True):
+        try:
+            byte = reader.readbits(8)
+            sequence = encoder[byte]
+            #TODO: read in path and add to sequence
+            for bit in sequence:
+                if bit == '1':
+                    writer.writebit(True)
+                else:
+                    writer.writebit(False)
+        except EOFError:
+            break
 
