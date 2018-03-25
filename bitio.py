@@ -69,6 +69,7 @@ class BitReader:
         return v
 
 
+'''
 if __name__ == "__main__":
     #reading bits
     #p1
@@ -101,7 +102,7 @@ if __name__ == "__main__":
                 writer.writebit(True)
             else:
                 writer.writebit(False)
-
+'''
 
             
         

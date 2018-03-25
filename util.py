@@ -27,8 +27,7 @@ def read_tree(bitreader):
 
     implementation: read each bit, and sort depending on what value it makes up
     '''     
-    #pass the input of the bitreader(the opened file) and construct
-    #the frequency table from the stream
+
     def construct_tree(bitreader):
         bit = bitreader.readbit()
         if bit == 1:
@@ -71,7 +70,10 @@ def decode_byte(tree, bitreader):
     """
     #read a bit
     bit = bitreader.readbit()
-    if isinstance(tree, huffman.TreeBranch):
+    if isinstance(tree, huffman.TreeLeaf):
+        #return value of tree leaf
+        return tree.value
+    elif isinstance(tree, huffman.TreeBranch):
         if bit == 0:
             #traverse left
             tree = tree.left
@@ -79,10 +81,7 @@ def decode_byte(tree, bitreader):
         elif bit == 1:
             #traverse right
             tree = tree.right
-            return decode_byte(tree, bitreader)
-    elif isinstance(tree, huffman.TreeLeaf):
-        #return value of tree leaf
-        return tree.value
+            return decode_byte(tree, bitreader)   
     else:
         print("big problems boys")
     
@@ -106,17 +105,15 @@ def decompress(compressed, uncompressed):
     #initate tree from 
     tree = read_tree(reader)
 
-    while(True):
+    while(True):    
         byte = decode_byte(tree, reader)
         if byte == None:
             break
         else:
             writer.writebits(byte,8)
-            print("decoding")
+            
 
 
-    
-    
 def write_tree(tree, bitwriter):
     '''Write the specified Huffman tree to the given bit writer.  The
     tree is written in the format described above for the read_tree
@@ -168,7 +165,6 @@ def compress(tree, uncompressed, compressed):
         try:
             byte = reader.readbits(8)
             sequence = encoder[byte]
-            #TODO: read in path and add to sequence
             for bit in sequence:
                 if bit == '1':
                     writer.writebit(True)
