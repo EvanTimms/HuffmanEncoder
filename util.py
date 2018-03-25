@@ -29,14 +29,10 @@ def read_tree(bitreader):
     '''     
     #pass the input of the bitreader(the opened file) and construct
     #the frequency table from the stream
-    tree = huffman.TreeBranch(None,None)
-    bit = bitreader.readbit()
-
-    def contruct_tree(bitreader):
+    def construct_tree(bitreader):
         bit = bitreader.readbit()
         if bit == 1:
-            tree.left = contruct_tree(bitreader)
-            tree.right = contruct_tree(bitreader)
+            return huffman.TreeBranch(construct_tree(bitreader),construct_tree(bitreader))
         elif bit == 0:
             bit2 == bitreader.readbit()
             if bit == 0:
@@ -44,8 +40,16 @@ def read_tree(bitreader):
             else:
                 val = bitreader.readbits(8)
                 return huffman.TreeLeaf(val)
+        
+
+    tree = huffman.TreeBranch(None,None)
+    bitreader.readbit()
+    tree.left = construct_tree(bitreader)
+    tree.right = construct_tree(bitreader)
+
     
-    return contruct_tree(bitreader)
+    
+    return tree
 
 
 
