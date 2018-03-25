@@ -29,7 +29,7 @@ def make_tree(freq_table):
 
     trees = BinaryHeap()
     trees.insert(TreeLeaf(None), 1)
-    for (symbol, freq) in freq_table.items():
+    for (symbol, freq) in freq_table.items():   
         trees.insert(TreeLeaf(symbol), freq)
 
     while len(trees) > 1:

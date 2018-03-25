@@ -29,21 +29,18 @@ def read_tree(bitreader):
     '''     
     #pass the input of the bitreader(the opened file) and construct
     #the frequency table from the stream
-    #table = huffman.make_freq_table(bitreader.input)
 
-    bit = bitreader.readbit()
-    if bit == 1:
-        return huffman.TreeBranch(read_tree(bitreader), read_tree(bitreader))
-    elif bit == 0:
-        secondBit = bitreader.readbit()
-        if secondBit == 0:
-            return
-        elif secondBit == 1:
-            return huffman.TreeLeaf(bitreader.readbits(8))
-
-
-
-    return huffman.make_tree(table)
+    tree = ""
+    while(True):
+        firstbit = bitreader.readbit()
+        if bit = 0:
+            secondbit = bitreader.readbit()
+            if firstbit == secondbit == 0:
+                tree +=str(firstbit) + str(secondbit)
+                break
+            else:
+                tree +=str(firstbit) + str(secondbit)
+    return tree
         
 
 def decode_byte(tree, bitreader):
@@ -98,15 +95,13 @@ def decompress(compressed, uncompressed):
     writer = bitio.BitWriter(uncompressed)
     #initate tree from 
     tree = read_tree(reader)
-
-    while(True):
+    byte = 0
+    while(byte != None):
         #until eof occurs, read byte from reader and decode using reader
         #then right the byte to the uncompressed file using the writer
-        try:
-            byte = decode_byte(tree, reader)
-            writer.writebits(byte,8)
-        except EOFError:
-            break
+        byte = decode_byte(tree, reader)
+        writer.writebits(byte,8)
+
 
     
     
@@ -129,12 +124,6 @@ def write_tree(tree, bitwriter):
             bitwriter.writebit(False)
             bitwriter.writebit(True)
             bitwriter.writebits(tree.value, 8)
-            #sequence = str(bin(tree.value))
-            #for bit in sequence[2:]:
-             #   if bit == '1':
-              #      bitwriter.writebit(True)
-               # else:
-                #    bitwriter.writebit(False)
 
     if isinstance(tree, huffman.TreeBranch):
         write_tree(tree.left, bitwriter)
@@ -175,15 +164,4 @@ def compress(tree, uncompressed, compressed):
                     writer.writebit(False)
         except EOFError:
             break
-
-if __name__ == "__main__":
-    with open("in.txt", "rb") as inFile:
-        reader = bitio.BitReader(inFile)
-        freq = huffman.make_freq_table(reader.input)
-        print(freq)
-        tree = huffman.make_tree(freq)
-        print("TREE:   ", tree)
-    with open("out.txt", "wb") as outFile:
-        writer = bitio.BitWriter(outFile)
-        write_tree(tree, writer)
 
