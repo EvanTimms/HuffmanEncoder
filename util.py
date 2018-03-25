@@ -34,8 +34,8 @@ def read_tree(bitreader):
         if bit == 1:
             return huffman.TreeBranch(construct_tree(bitreader),construct_tree(bitreader))
         elif bit == 0:
-            bit2 == bitreader.readbit()
-            if bit == 0:
+            bit2 = bitreader.readbit()
+            if bit2 == 0:
                 return huffman.TreeLeaf(None)
             else:
                 val = bitreader.readbits(8)
@@ -71,7 +71,7 @@ def decode_byte(tree, bitreader):
     """
     #read a bit
     bit = bitreader.readbit()
-    if isinstance(tree, TreeBranch):
+    if isinstance(tree, huffman.TreeBranch):
         if bit == 1 :
             #traverse left
             tree = tree.left
@@ -80,7 +80,7 @@ def decode_byte(tree, bitreader):
             #traverse right
             tree = tree.right
             return decode_byte(tree, bitreader)
-    elif isInstance(tree, TreeLeaf):
+    elif isinstance(tree, huffman.TreeLeaf):
         #return value of tree leaf
         return tree.value
     else:
