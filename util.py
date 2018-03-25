@@ -32,7 +32,10 @@ def read_tree(bitreader):
     def construct_tree(bitreader):
         bit = bitreader.readbit()
         if bit == 1:
-            return huffman.TreeBranch(construct_tree(bitreader),construct_tree(bitreader))
+            new_branch = huffman.TreeBranch(None,None)
+            new_branch.left = construct_tree(bitreader)
+            new_branch.right = construct_tree(bitreader)
+            return new_branch
         elif bit == 0:
             bit2 = bitreader.readbit()
             if bit2 == 0:
@@ -41,14 +44,11 @@ def read_tree(bitreader):
                 val = bitreader.readbits(8)
                 return huffman.TreeLeaf(val)
         
-
     tree = huffman.TreeBranch(None,None)
     bitreader.readbit()
     tree.left = construct_tree(bitreader)
     tree.right = construct_tree(bitreader)
 
-    
-    
     return tree
 
 
@@ -72,11 +72,11 @@ def decode_byte(tree, bitreader):
     #read a bit
     bit = bitreader.readbit()
     if isinstance(tree, huffman.TreeBranch):
-        if bit == 1 :
+        if bit == 0:
             #traverse left
             tree = tree.left
             return decode_byte(tree, bitreader)
-        elif bit == 0:
+        elif bit == 1:
             #traverse right
             tree = tree.right
             return decode_byte(tree, bitreader)
@@ -84,7 +84,7 @@ def decode_byte(tree, bitreader):
         #return value of tree leaf
         return tree.value
     else:
-        print("big problems boys    ")
+        print("big problems boys")
     
 
 
@@ -105,12 +105,14 @@ def decompress(compressed, uncompressed):
     writer = bitio.BitWriter(uncompressed)
     #initate tree from 
     tree = read_tree(reader)
-    byte = 0
-    while(byte != None):
-        #until eof occurs, read byte from reader and decode using reader
-        #then right the byte to the uncompressed file using the writer
+
+    while(True):
         byte = decode_byte(tree, reader)
-        writer.writebits(byte,8)
+        if byte == None:
+            break
+        else:
+            writer.writebits(byte,8)
+            print("decoding")
 
 
     
