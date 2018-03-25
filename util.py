@@ -27,10 +27,11 @@ def read_tree(bitreader):
 
     implementation: read each bit, and sort depending on what value it makes up
     '''     
-
+    #recursive function that constructs the tree by reading in bytes
     def construct_tree(bitreader):
         bit = bitreader.readbit()
         if bit == 1:
+            #need a branch, construct a new one and its branchs
             new_branch = huffman.TreeBranch(None,None)
             new_branch.left = construct_tree(bitreader)
             new_branch.right = construct_tree(bitreader)
@@ -38,13 +39,19 @@ def read_tree(bitreader):
         elif bit == 0:
             bit2 = bitreader.readbit()
             if bit2 == 0:
+                #eof file character
                 return huffman.TreeLeaf(None)
             else:
+                #return the value of the next 8 bits corresponding to the leaf
                 val = bitreader.readbits(8)
                 return huffman.TreeLeaf(val)
         
+    #initalize tree branch    
     tree = huffman.TreeBranch(None,None)
+    #since the first bit is always one, we can ignore it since the first branch
+    #has already been constructed.
     bitreader.readbit()
+    #contruct the left and right portions of the tree respectivlty.
     tree.left = construct_tree(bitreader)
     tree.right = construct_tree(bitreader)
 
@@ -69,6 +76,7 @@ def decode_byte(tree, bitreader):
     the input sequence tells you when to go left or right.
     """    
     if isinstance(tree, huffman.TreeBranch):
+        #if the node is a branch, read the next bit and traverse left or right
         bit = bitreader.readbit()
         if bit == 0:
             #traverse left
@@ -99,14 +107,16 @@ def decompress(compressed, uncompressed):
     #set up reader and writer 
     reader = bitio.BitReader(compressed)
     writer = bitio.BitWriter(uncompressed)
-    #initate tree from 
+    #read in and construct tree
     tree = read_tree(reader)
 
     while(True):    
         byte = decode_byte(tree, reader)
+        #if the byte is the eof char, break you are done
         if byte == None:
             break
         else:
+            #write bits to uncompressed file
             writer.writebits(byte,8)
             
 
@@ -123,6 +133,8 @@ def write_tree(tree, bitwriter):
       bitwriter: An instance of bitio.BitWriter to write the tree to.
     '''
     if isinstance(tree, huffman.TreeLeaf):
+        #check the leafs value, if its the eof(represented by none) write 00
+        #else, write the chars ascii num representation 
         if tree.value == None:
             bitwriter.writebit(False)
             bitwriter.writebit(False)
@@ -132,7 +144,10 @@ def write_tree(tree, bitwriter):
             
             bitwriter.writebits(tree.value, 8)
 
-    if isinstance(tree, huffman.TreeBranch):
+    elif isinstance(tree, huffman.TreeBranch):
+        #write a 1 representing the branch and write the left and write of the
+        #branch
+        bitwriter.writebit(True)
         write_tree(tree.left, bitwriter)
         write_tree(tree.right, bitwriter)
 
@@ -155,16 +170,22 @@ def compress(tree, uncompressed, compressed):
     #set up reader and writer 
     reader = bitio.BitReader(uncompressed)
     writer = bitio.BitWriter(compressed)
-    
+
+    #write tree to output file
     write_tree(tree, writer)
+    #construct encoding table from tree
     encoder = huffman.make_encoding_table(tree)
 
     while(True):
         try:
+            #read in a byte and find its bit representation using the 
+            #encoding table
             byte = reader.readbits(8)
             sequence = encoder[byte]
+            #write out the sequence of bits
             for bit in sequence:
                 writer.writebit(bit)
+        #when eof occurs, break from loop you are done writing the file
         except EOFError:
             break
 
