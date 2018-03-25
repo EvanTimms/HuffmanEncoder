@@ -69,11 +69,10 @@ def decode_byte(tree, bitreader):
     the input sequence tells you when to go left or right.
     """
     #read a bit
-    bit = bitreader.readbit()
-    if isinstance(tree, huffman.TreeLeaf):
-        #return value of tree leaf
-        return tree.value
-    elif isinstance(tree, huffman.TreeBranch):
+    
+    
+    if isinstance(tree, huffman.TreeBranch):
+        bit = bitreader.readbit()
         if bit == 0:
             #traverse left
             tree = tree.left
@@ -81,9 +80,10 @@ def decode_byte(tree, bitreader):
         elif bit == 1:
             #traverse right
             tree = tree.right
-            return decode_byte(tree, bitreader)   
-    else:
-        print("big problems boys")
+            return decode_byte(tree, bitreader)  
+    elif isinstance(tree, huffman.TreeLeaf):
+        #return value of tree leaf
+        return tree.value 
     
 
 
@@ -126,12 +126,13 @@ def write_tree(tree, bitwriter):
       bitwriter: An instance of bitio.BitWriter to write the tree to.
     '''
     if isinstance(tree, huffman.TreeLeaf):
-        if tree.value is None:
+        if tree.value == None:
             bitwriter.writebit(False)
             bitwriter.writebit(False)
         else:
             bitwriter.writebit(False)
             bitwriter.writebit(True)
+            
             bitwriter.writebits(tree.value, 8)
 
     if isinstance(tree, huffman.TreeBranch):
@@ -155,8 +156,8 @@ def compress(tree, uncompressed, compressed):
           and the coded input data.
     '''
     #set up reader and writer 
-    reader = bitio.BitReader(compressed)
-    writer = bitio.BitWriter(uncompressed)
+    reader = bitio.BitReader(uncompressed)
+    writer = bitio.BitWriter(compressed)
     write_tree(tree, writer)
 
     encoder = huffman.make_encoding_table(tree)
@@ -166,7 +167,7 @@ def compress(tree, uncompressed, compressed):
             byte = reader.readbits(8)
             sequence = encoder[byte]
             for bit in sequence:
-                if bit == '1':
+                if bit == 1:
                     writer.writebit(True)
                 else:
                     writer.writebit(False)
