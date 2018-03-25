@@ -67,10 +67,7 @@ def decode_byte(tree, bitreader):
 
     Starting from the root, traverse the Huffman tree. Each bit from
     the input sequence tells you when to go left or right.
-    """
-    #read a bit
-    
-    
+    """    
     if isinstance(tree, huffman.TreeBranch):
         bit = bitreader.readbit()
         if bit == 0:
@@ -158,8 +155,8 @@ def compress(tree, uncompressed, compressed):
     #set up reader and writer 
     reader = bitio.BitReader(uncompressed)
     writer = bitio.BitWriter(compressed)
+    
     write_tree(tree, writer)
-
     encoder = huffman.make_encoding_table(tree)
 
     while(True):
@@ -167,10 +164,7 @@ def compress(tree, uncompressed, compressed):
             byte = reader.readbits(8)
             sequence = encoder[byte]
             for bit in sequence:
-                if bit == 1:
-                    writer.writebit(True)
-                else:
-                    writer.writebit(False)
+                writer.writebit(bit)
         except EOFError:
             break
 
